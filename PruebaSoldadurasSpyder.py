@@ -93,13 +93,16 @@ trans_P = transforms.ToPILImage()
 
 #print(torch.nonzero(pil_img))
 
-directory = os.fsencode('./DatasetSoldaduras/NFD1')
+directorio_salida = input("Directorio donde se encuentran las imagenes a transformar : ")
+directorio_guardar = input("Directorio donde guardamos las imagenes :")
+
+directory = os.fsencode(directorio_salida)
 
 medias = []
 desviaciones = []
-for i in os.listdir(directory):
+for i in os.listdir(directorio_salida):
     nombre_imagen = os.fsdecode(i)
-    imagen = Image.open('./DatasetSoldaduras/NFD1/' + nombre_imagen)
+    imagen = Image.open(directorio_salida + nombre_imagen)
     imagen = trans_T(imagen)
     mean_c1 = imagen[0, :, :].mean()
     std_c1 = imagen[0, :, :].std()
@@ -115,7 +118,6 @@ std_c1 = sum(desviaciones) / len(desviaciones)
     
 print("La media es :", mean_c1, "La desviacion estandar es:", std_c1)
 
-
     
 transform=transforms.Compose([
     transforms.Resize((50,100)),
@@ -129,11 +131,12 @@ transform=transforms.Compose([
     transforms.ToPILImage()
 ])
 
-directorio_guardar = './DatasetSoldadurasMod/NFD1/'
+#directorio_guardar = './DatasetSoldadurasMod/NFD1/'
 
-for i in os.listdir(directory):
+
+for i in os.listdir(directorio_salida):
     nombre_imagen = os.fsdecode(i)
-    imagen = Image.open('./DatasetSoldaduras/NFD1/' + nombre_imagen)
+    imagen = Image.open(directorio_salida + nombre_imagen)
     imagen = transform(imagen)
     if not os.path.exists(directorio_guardar):
         os.makedirs(directorio_guardar)
