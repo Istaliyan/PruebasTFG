@@ -1,4 +1,9 @@
-/data/*
-.ipynb_checkpoints/
+*
+!.gitignore
+!Clasificador de imagenes.ipynb
+!PruebaSoldadurasSpyder.py
+!README.md
+
+
     
     
