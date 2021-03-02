@@ -6,24 +6,25 @@ Created on Thu Feb 18 11:28:16 2021
 @author: yani
 """
 
-
-import torch
 import random
 import os
+import torch
 #import torchvision
-from IPython.display import display
+#from IPython.display import display
 import torchvision.transforms as transforms
 #import matplotlib.pyplot as plt
 #import numpy as np
 
 #from torch.autograd import Variable
 #import cv2
-from PIL import Image, ImageEnhance
+from PIL import Image #, ImageEnhance
 
 
 
 
 class AddGaussianNoise:
+    """Clase para añadir ruido gausiano"""
+
     def __init__(self, mean=0., std=1.):
         self.std = std
         self.mean = mean
@@ -39,8 +40,11 @@ class AddGaussianNoise:
 #         noise = Variable(ins.data.new(ins.size()).normal_(mean, stddev))
 #         return ins + noise
 #     return ins
-    
+
+
 class RandomCrop(object):
+    """Clase para hacer un recorte con unos valores aleatorios dentro de limitaciones
+    impuestas por el usuario"""
 
     def __init__(self, max_x, max_y):
         self.max_x = max_x
@@ -61,6 +65,7 @@ class RandomCrop(object):
 trans_T = transforms.ToTensor()
 # trans_S = transforms.Resize((200,1000))
 trans_P = transforms.ToPILImage()
+trans_Crop = RandomCrop(20, 20)
 # trans_C = transforms.ColorJitter(contrast = 0.7)
 #trans_P(trans_S(trans_T(pil_img))).show()
 
@@ -110,17 +115,16 @@ for i in os.listdir(directorio_salida):
     desviaciones.append(std_c1)
     trans_P(imagen)
 
+
 mean_c1 = sum(medias) / len(medias)
 std_c1 = sum(desviaciones) / len(desviaciones)    
     
 # mean_c1 = pil_img[0, :, :].mean()
 # std_c1 = pil_img[0, :, :].std()
-    
 print("La media es :", mean_c1, "La desviacion estandar es:", std_c1)
 
-    
-transform=transforms.Compose([
-    transforms.Resize((50,100)),
+transformCropRuido=transforms.Compose([ 
+    transforms.Resize((50, 100)),
     #transforms.Normalize((0.1,), (0.3,)),
     #transforms.ColorJitter(contrast = 0.7),
     transforms.ToTensor(),
@@ -131,24 +135,36 @@ transform=transforms.Compose([
     transforms.ToPILImage()
 ])
 
-#directorio_guardar = './DatasetSoldadurasMod/NFD1/'
+transformCrop = transforms.Compose([
+    transforms.Resize((50, 100)),
+    transforms.ToTensor(),
+    RandomCrop(20, 20),
+    transforms.ToPILImage()
+])
 
+#directorio_guardar = './DatasetSoldadurasMod/NFD1/'
+    
 
 for i in os.listdir(directorio_salida):
     nombre_imagen = os.fsdecode(i)
     imagen = Image.open(directorio_salida + nombre_imagen)
-    imagen = transform(imagen)
+    imagen_Crop = imagen
+    imagen_Crop = transformCrop(imagen)
+    imagen_Crop_Ruido = transformCropRuido(imagen)
     if not os.path.exists(directorio_guardar):
         os.makedirs(directorio_guardar)
-    imagen.save(directorio_guardar + nombre_imagen)
+    imagen_Crop.save(directorio_guardar + "crop" + nombre_imagen )
+    imagen_Crop_Ruido.save(directorio_guardar + "crop_ruido" +nombre_imagen)
+
+
 
 
 #Añadimos 1 imagen blanca y otra negra por completo
 
-imagen_negra = torch.zeros(1,50,100)
-imagen_blanca = torch.zeros(1,50,100)
+imagen_negra = torch.zeros(1, 50, 100)
+imagen_blanca = torch.zeros(1, 50, 100)
 
-imagen_blanca[0, : , : ] = 1
+imagen_blanca[0, :, :] = 1
 
 imagen_negra = trans_P(imagen_negra)
 imagen_blanca = trans_P(imagen_blanca)
@@ -157,13 +173,10 @@ imagen_blanca.save(directorio_guardar + "ImagenBlanca.jpg")
 imagen_negra.save(directorio_guardar + "ImagenNegra.jpg")
 
 
-print("No se imprimen las imagenes")
 
 #pil_img = gaussian(trans_T(pil_img), True, 0.3, 0.04)
 #print(pil_img)
-#pil_img = trans_P(pil_img)
-
- 
+#pil_img = trans_P(pil_img) 
 
 #display(pil_img)
 #pil_img.show()
