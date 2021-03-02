@@ -143,6 +143,22 @@ for i in os.listdir(directorio_salida):
     imagen.save(directorio_guardar + nombre_imagen)
 
 
+#Añadimos 1 imagen blanca y otra negra por completo
+
+imagen_negra = torch.zeros(1,50,100)
+imagen_blanca = torch.zeros(1,50,100)
+
+imagen_blanca[0, : , : ] = 1
+
+imagen_negra = trans_P(imagen_negra)
+imagen_blanca = trans_P(imagen_blanca)
+
+imagen_blanca.save(directorio_guardar + "ImagenBlanca.jpg")
+imagen_negra.save(directorio_guardar + "ImagenNegra.jpg")
+
+
+print("No se imprimen las imagenes")
+
 #pil_img = gaussian(trans_T(pil_img), True, 0.3, 0.04)
 #print(pil_img)
 #pil_img = trans_P(pil_img)
