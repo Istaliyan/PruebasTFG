@@ -9,14 +9,8 @@ Created on Thu Feb 18 11:28:16 2021
 import random
 import os
 import torch
-#import torchvision
-#from IPython.display import display
 import torchvision.transforms as transforms
-#import matplotlib.pyplot as plt
-#import numpy as np
 
-#from torch.autograd import Variable
-#import cv2
 from PIL import Image #, ImageEnhance
 
 
@@ -59,52 +53,16 @@ class RandomCrop(object):
         return tensor
     
 
-
-#pil_img = Image.open('./DatasetSoldaduras/NFD1/Pieza_15_Soldadura_77.png')
-#pil_img = Image.open('./DatasetSoldaduras/NFD1/download.jpg').convert('RGB')
 trans_T = transforms.ToTensor()
-# trans_S = transforms.Resize((200,1000))
 trans_P = transforms.ToPILImage()
 trans_Crop = RandomCrop(20, 20)
-# trans_C = transforms.ColorJitter(contrast = 0.7)
-#trans_P(trans_S(trans_T(pil_img))).show()
 
-
-#pil_img = ImageEnhance.Contrast(pil_img).enhance(2)
-
-
-# display(pil_img)
-
-#torch.set_printoptions(edgeitems=3)
-# display(trans_C(pil_img))
-# pil_img = trans_T(pil_img)
-
-# print(pil_img.size())
-# print(pil_img.dim())
-
-
-# x1 = random.randint(0, 40)
-# x2 = random.randint(60, 80)
-# y1 = random.randint(0, 50)
-# y2 = random.randint(200,250)
-
-# pil_img[0,x1:x2,y1:y2] = 0
-
-# pil_img = trans_P(pil_img)
-
-# display(pil_img)
-
-# pil_img = trans_T(pil_img)
-
-#print(torch.nonzero(pil_img))
 
 directorio_salida = input("Directorio donde se encuentran las imagenes a transformar : ")
 directorio_guardar = input("Directorio donde guardamos las imagenes :")
 
 directorios = [x[1] for x in os.walk(directorio_salida)]
-
 directorios = directorios[0]
-#directory = os.fsencode(directorio_salida)
 
 for directorio in directorios:
     medias = []
@@ -123,8 +81,6 @@ for directorio in directorios:
     mean_c1 = sum(medias) / len(medias)
     std_c1 = sum(desviaciones) / len(desviaciones)    
         
-    # mean_c1 = pil_img[0, :, :].mean()
-    # std_c1 = pil_img[0, :, :].std()
     print("La media es :", mean_c1, "La desviacion estandar es:", std_c1)
 
     transformCropRuido=transforms.Compose([ 
@@ -146,8 +102,6 @@ for directorio in directorios:
         transforms.ToPILImage()
     ])
 
-    #directorio_guardar = './DatasetSoldadurasMod/NFD1/'
-
     for i in os.listdir(directorio_salida + directorio):
         nombre_imagen = os.fsdecode(i)
         imagen = Image.open(directorio_salida + directorio  + "/" + nombre_imagen)
@@ -163,7 +117,7 @@ for directorio in directorios:
 
 
 
-    #Añadimos 1 imagen blanca y otra negra por completo
+
 
     imagen_negra = torch.zeros(1, 50, 100)
     imagen_blanca = torch.zeros(1, 50, 100)
@@ -176,30 +130,3 @@ for directorio in directorios:
     imagen_blanca.save(directorio_guardar + directorio + "/" + "ImagenBlanca.jpg")
     imagen_negra.save(directorio_guardar + directorio + "/" + "ImagenNegra.jpg")
 
-
-
-#pil_img = gaussian(trans_T(pil_img), True, 0.3, 0.04)
-#print(pil_img)
-#pil_img = trans_P(pil_img) 
-
-#display(pil_img)
-#pil_img.show()
-#pil_img = trans_P(pil_img)
-
-
-
-
-#print(pil_img.size())
-# pil_img = trans_P(transform(pil_img))
-
-# #pil_img = trans_S(pil_img)
-# #print("La longitud del tensor es :" , pil_img.nelement())
-# print(pil_img)
-# display(pil_img)
-#pil_img.show()
-
-
-#img = cv2.imread('./DatasetSoldaduras/NFD1/Pieza_15_Soldadura_77.png')
-#blur = cv2.GaussianBlur(img, (5,5), 0)
-#plt.imshow(blur)
-#cv2.imwrite('Gauss.png',blur)
