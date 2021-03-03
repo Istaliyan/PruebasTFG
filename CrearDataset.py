@@ -101,76 +101,80 @@ trans_Crop = RandomCrop(20, 20)
 directorio_salida = input("Directorio donde se encuentran las imagenes a transformar : ")
 directorio_guardar = input("Directorio donde guardamos las imagenes :")
 
-directory = os.fsencode(directorio_salida)
+directorios = [x[1] for x in os.walk(directorio_salida)]
 
-medias = []
-desviaciones = []
-for i in os.listdir(directorio_salida):
-    nombre_imagen = os.fsdecode(i)
-    imagen = Image.open(directorio_salida + nombre_imagen)
-    imagen = trans_T(imagen)
-    mean_c1 = imagen[0, :, :].mean()
-    std_c1 = imagen[0, :, :].std()
-    medias.append(mean_c1)
-    desviaciones.append(std_c1)
-    trans_P(imagen)
+directorios = directorios[0]
+#directory = os.fsencode(directorio_salida)
 
-
-mean_c1 = sum(medias) / len(medias)
-std_c1 = sum(desviaciones) / len(desviaciones)    
-    
-# mean_c1 = pil_img[0, :, :].mean()
-# std_c1 = pil_img[0, :, :].std()
-print("La media es :", mean_c1, "La desviacion estandar es:", std_c1)
-
-transformCropRuido=transforms.Compose([ 
-    transforms.Resize((50, 100)),
-    #transforms.Normalize((0.1,), (0.3,)),
-    #transforms.ColorJitter(contrast = 0.7),
-    transforms.ToTensor(),
-    RandomCrop(20, 20),
-    transforms.Normalize((mean_c1,), (std_c1,)),
-    #AddGaussianNoise(0.3 , 0.04 )
-    AddGaussianNoise(mean_c1, std_c1 ),
-    transforms.ToPILImage()
-])
-
-transformCrop = transforms.Compose([
-    transforms.Resize((50, 100)),
-    transforms.ToTensor(),
-    RandomCrop(20, 20),
-    transforms.ToPILImage()
-])
-
-#directorio_guardar = './DatasetSoldadurasMod/NFD1/'
-    
-
-for i in os.listdir(directorio_salida):
-    nombre_imagen = os.fsdecode(i)
-    imagen = Image.open(directorio_salida + nombre_imagen)
-    imagen_Crop = imagen
-    imagen_Crop = transformCrop(imagen)
-    imagen_Crop_Ruido = transformCropRuido(imagen)
-    if not os.path.exists(directorio_guardar):
-        os.makedirs(directorio_guardar)
-    imagen_Crop.save(directorio_guardar + "crop" + nombre_imagen )
-    imagen_Crop_Ruido.save(directorio_guardar + "crop_ruido" +nombre_imagen)
+for directorio in directorios:
+    medias = []
+    desviaciones = []
+    for i in os.listdir(directorio_salida + directorio):
+        nombre_imagen = os.fsdecode(i)
+        imagen = Image.open(directorio_salida + directorio + "/" + nombre_imagen)
+        imagen = trans_T(imagen)
+        mean_c1 = imagen[0, :, :].mean()
+        std_c1 = imagen[0, :, :].std()
+        medias.append(mean_c1)
+        desviaciones.append(std_c1)
+        trans_P(imagen)
 
 
+    mean_c1 = sum(medias) / len(medias)
+    std_c1 = sum(desviaciones) / len(desviaciones)    
+        
+    # mean_c1 = pil_img[0, :, :].mean()
+    # std_c1 = pil_img[0, :, :].std()
+    print("La media es :", mean_c1, "La desviacion estandar es:", std_c1)
+
+    transformCropRuido=transforms.Compose([ 
+        transforms.Resize((50, 100)),
+        #transforms.Normalize((0.1,), (0.3,)),
+        #transforms.ColorJitter(contrast = 0.7),
+        transforms.ToTensor(),
+        RandomCrop(20, 20),
+        transforms.Normalize((mean_c1,), (std_c1,)),
+        #AddGaussianNoise(0.3 , 0.04 )
+        AddGaussianNoise(mean_c1, std_c1 ),
+        transforms.ToPILImage()
+    ])
+
+    transformCrop = transforms.Compose([
+        transforms.Resize((50, 100)),
+        transforms.ToTensor(),
+        RandomCrop(20, 20),
+        transforms.ToPILImage()
+    ])
+
+    #directorio_guardar = './DatasetSoldadurasMod/NFD1/'
+
+    for i in os.listdir(directorio_salida + directorio):
+        nombre_imagen = os.fsdecode(i)
+        imagen = Image.open(directorio_salida + directorio  + "/" + nombre_imagen)
+        #imagen = Image.open(directorio_salida + nombre_imagen)
+        imagen_Crop = imagen
+        imagen_Crop = transformCrop(imagen)
+        imagen_Crop_Ruido = transformCropRuido(imagen)
+        if not os.path.exists(directorio_guardar + directorio + "/"):
+            os.makedirs(directorio_guardar + directorio + "/")
+        imagen_Crop.save(directorio_guardar + directorio + "/" + "crop" + nombre_imagen )
+        imagen_Crop_Ruido.save(directorio_guardar + directorio + "/" + "crop_ruido" + nombre_imagen)
 
 
-#Añadimos 1 imagen blanca y otra negra por completo
 
-imagen_negra = torch.zeros(1, 50, 100)
-imagen_blanca = torch.zeros(1, 50, 100)
 
-imagen_blanca[0, :, :] = 1
+    #Añadimos 1 imagen blanca y otra negra por completo
 
-imagen_negra = trans_P(imagen_negra)
-imagen_blanca = trans_P(imagen_blanca)
+    imagen_negra = torch.zeros(1, 50, 100)
+    imagen_blanca = torch.zeros(1, 50, 100)
 
-imagen_blanca.save(directorio_guardar + "ImagenBlanca.jpg")
-imagen_negra.save(directorio_guardar + "ImagenNegra.jpg")
+    imagen_blanca[0, :, :] = 1
+
+    imagen_negra = trans_P(imagen_negra)
+    imagen_blanca = trans_P(imagen_blanca)
+
+    imagen_blanca.save(directorio_guardar + directorio + "/" + "ImagenBlanca.jpg")
+    imagen_negra.save(directorio_guardar + directorio + "/" + "ImagenNegra.jpg")
 
 
 
