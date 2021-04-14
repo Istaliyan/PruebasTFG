@@ -10,6 +10,9 @@ import random
 import os
 import torch
 import torchvision.transforms as transforms
+import skimage.util
+import numpy as np
+
 
 from PIL import Image #, ImageEnhance
 
@@ -51,6 +54,40 @@ class RandomCrop(object):
         y2 = random.randint(self.max_y + 10,50)
         tensor[0, y1:y2, x1:x2] = 0
         return tensor
+
+class RandomCropDerecha(object):
+    """Clase para hacer el recorte en la parte derecha de la imagen"""
+    def __init__(self, max_x, max_y):
+        self.max_x = max_x
+        self.max_y = max_y
+    
+    def __call__(self,tensor,posicion):
+
+        if posicion=='derecha':
+            x1 = random.randint(50, 50 + self.max_x)
+            x2 = random.randint(50 + self.max_x, 100)
+
+        elif posicion=='izquierda':
+            x1 = random.randint(0, self.max_x)
+            x2 = random.randint(self.max_x + 20, 60)
+        
+        y1 = random.randint(0, self.max_y)
+        y2 = random.randint(self.max_y + 10,50)
+        tensor[0, y1:y2, x1:x2] = 0
+
+        return tensor
+
+
+class RuidoScikit(object):
+    """Clase para aplicar ruido gausiano mediante sci-kit."""
+    def __init__(self,mode,seed):
+        self.mode = mode
+        self.seed = seed
+
+    def __call__(self, image):
+        image = np.asarray(image)
+        image = skimage.util.random_noise(image, mode=self.mode , seed=self.seed)
+        return image
     
 
 trans_T = transforms.ToTensor()
@@ -63,6 +100,8 @@ directorio_guardar = input("Directorio donde guardamos las imagenes :")
 
 directorios = [x[1] for x in os.walk(directorio_salida)]
 directorios = directorios[0]
+
+numeroImagen = 0
 
 for directorio in directorios:
     medias = []
@@ -88,17 +127,18 @@ for directorio in directorios:
         #transforms.Normalize((0.1,), (0.3,)),
         #transforms.ColorJitter(contrast = 0.7),
         transforms.ToTensor(),
-        RandomCrop(20, 20),
+        #RandomCrop(20, 20),
         transforms.Normalize((mean_c1,), (std_c1,)),
         #AddGaussianNoise(0.3 , 0.04 )
-        AddGaussianNoise(mean_c1, std_c1 ),
-        transforms.ToPILImage()
+        #AddGaussianNoise(mean_c1, std_c1 ),
+        transforms.ToPILImage(),
+
     ])
 
     transformCrop = transforms.Compose([
         transforms.Resize((50, 100)),
         transforms.ToTensor(),
-        RandomCrop(20, 20),
+        #RandomCrop(20, 20),
         transforms.ToPILImage()
     ])
 
@@ -111,14 +151,13 @@ for directorio in directorios:
         imagen_Crop_Ruido = transformCropRuido(imagen)
         if not os.path.exists(directorio_guardar + directorio + "/"):
             os.makedirs(directorio_guardar + directorio + "/")
-        imagen_Crop.save(directorio_guardar + directorio + "/" + "crop" + nombre_imagen )
-        imagen_Crop_Ruido.save(directorio_guardar + directorio + "/" + "crop_ruido" + nombre_imagen)
+        #imagen_Crop.save(directorio_guardar + directorio + "/" + "crop" + str(numeroImagen) + nombre_imagen )
+        #imagen_Crop_Ruido.save(directorio_guardar + directorio + "/" + "crop_ruido" + str(numeroImagen) + nombre_imagen )
+        imagen_Crop.save(directorio_guardar + directorio + "/" + nombre_imagen )
+        imagen_Crop_Ruido.save(directorio_guardar + directorio + "/" + "Ruido" + nombre_imagen )
+        numeroImagen = numeroImagen + 1
 
-
-
-
-
-
+"""
     imagen_negra = torch.zeros(1, 50, 100)
     imagen_blanca = torch.zeros(1, 50, 100)
 
@@ -127,6 +166,7 @@ for directorio in directorios:
     imagen_negra = trans_P(imagen_negra)
     imagen_blanca = trans_P(imagen_blanca)
 
-    imagen_blanca.save(directorio_guardar + directorio + "/" + "ImagenBlanca.jpg")
-    imagen_negra.save(directorio_guardar + directorio + "/" + "ImagenNegra.jpg")
+    imagen_blanca.save(directorio_guardar + directorio + "/" + "imagenBlanca.jpg")
+    imagen_negra.save(directorio_guardar + directorio + "/" + "imagenNegra.jpg")
+"""
 
